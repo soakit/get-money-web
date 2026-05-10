@@ -1,0 +1,80 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SettlementCard from '../components/SettlementCard.astro';
+import { getCollection } from 'astro:content';
+
+const allSettlements = await getCollection('settlements');
+// Sort by deadline ascending
+const sortedSettlements = allSettlements.sort((a, b) => 
+  a.data.deadline.valueOf() - b.data.deadline.valueOf()
+);
+---
+
+<Layout title="ClaimTracker - Find Consumer Settlements You Qualify For" description="Track and claim your share of consumer class action settlements. Find 'no proof required' settlements to claim money easily.">
+  <div class="bg-blue-600 text-white py-16 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mb-6">
+        Claim Your Share of Corporate Settlements
+      </h1>
+      <p class="text-xl sm:text-2xl font-medium text-blue-100 max-w-2xl mx-auto">
+        Companies pay millions in class action settlements every year. Find out if you're owed money—often with no receipt required.
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+      <h2 class="text-2xl font-bold text-gray-900">Active Settlements</h2>
+      
+      <div class="flex items-center gap-2">
+        <input type="checkbox" id="noProofFilter" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer" />
+        <label for="noProofFilter" class="text-gray-700 font-medium cursor-pointer select-none">
+          Show "No Proof Required" Only
+        </label>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="settlementGrid">
+      {sortedSettlements.map((settlement) => (
+        <div class="settlement-item" data-no-proof={settlement.data.noProofRequired.toString()}>
+          <SettlementCard settlement={settlement} />
+        </div>
+      ))}
+    </div>
+    
+    <div id="noResults" class="hidden text-center py-12 text-gray-500">
+      <p class="text-lg">No settlements match your filter criteria.</p>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterCheckbox = document.getElementById('noProofFilter') as HTMLInputElement;
+    const items = document.querySelectorAll('.settlement-item');
+    const noResults = document.getElementById('noResults');
+    
+    if (!filterCheckbox) return;
+
+    filterCheckbox.addEventListener('change', (e) => {
+      const showOnlyNoProof = (e.target as HTMLInputElement).checked;
+      let visibleCount = 0;
+
+      items.forEach((item) => {
+        const isNoProof = item.getAttribute('data-no-proof') === 'true';
+        const el = item as HTMLElement;
+        
+        if (showOnlyNoProof && !isNoProof) {
+          el.style.display = 'none';
+        } else {
+          el.style.display = 'block';
+          visibleCount++;
+        }
+      });
+      
+      if (noResults) {
+        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+      }
+    });
+  });
+</script>

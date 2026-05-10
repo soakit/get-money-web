@@ -1,0 +1,46 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  settlement: CollectionEntry<'settlements'>;
+}
+
+const { settlement } = Astro.props;
+const { title, description, amount, deadline, noProofRequired } = settlement.data;
+---
+
+<a href={`/settlements/${settlement.id}`} class="block group">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all duration-200 hover:shadow-md hover:border-blue-300 h-full flex flex-col relative overflow-hidden">
+    {noProofRequired && (
+      <div class="absolute top-0 right-0 bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-bl-lg">
+        No Proof Required
+      </div>
+    )}
+    
+    <div class="mb-4 pr-16">
+      <h3 class="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+        {title}
+      </h3>
+    </div>
+    
+    <p class="text-gray-600 text-sm mb-6 line-clamp-3 flex-grow">
+      {description}
+    </p>
+    
+    <div class="mt-auto space-y-3 pt-4 border-t border-gray-100">
+      <div class="flex items-center text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="font-semibold text-gray-900">{amount}</span>
+      </div>
+      
+      <div class="flex items-center text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span class="text-sm">Deadline: <span class="font-medium text-gray-900">{deadline.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span></span>
+      </div>
+    </div>
+  </div>
+</a>

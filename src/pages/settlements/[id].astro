@@ -1,0 +1,89 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const settlements = await getCollection('settlements');
+  return settlements.map(settlement => ({
+    params: { id: settlement.id },
+    props: { settlement },
+  }));
+}
+
+const { settlement } = Astro.props;
+const { title, description, amount, deadline, noProofRequired, officialUrl } = settlement.data;
+const { Content } = await render(settlement);
+
+// Schema.org JSON-LD
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": title,
+  "description": description,
+  "datePublished": new Date().toISOString(), // In real app, might come from frontmatter
+  "author": {
+    "@type": "Organization",
+    "name": "ClaimTracker"
+  }
+};
+---
+
+<Layout title={`${title} | ClaimTracker`} description={description}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </Fragment>
+  
+  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <a href="/" class="text-blue-600 hover:text-blue-800 font-medium mb-8 inline-flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Back to all settlements
+    </a>
+    
+    <header class="mb-10">
+      <div class="flex items-center gap-3 mb-4">
+        {noProofRequired && (
+          <span class="bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full">
+            No Proof Required
+          </span>
+        )}
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6">{title}</h1>
+      <p class="text-xl text-gray-600">{description}</p>
+    </header>
+    
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-6 mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+      <div class="space-y-4">
+        <div class="flex items-center text-gray-900">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <div class="text-sm text-gray-500 font-medium">Estimated Payout</div>
+            <div class="font-bold text-lg">{amount}</div>
+          </div>
+        </div>
+        
+        <div class="flex items-center text-gray-900">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <div>
+            <div class="text-sm text-gray-500 font-medium">Claim Deadline</div>
+            <div class="font-bold text-lg">{deadline.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+          </div>
+        </div>
+      </div>
+      
+      <a href={officialUrl} target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-sm transition-colors text-center inline-block">
+        Submit Claim
+      </a>
+    </div>
+    
+    <div class="prose prose-blue max-w-none">
+      <h2>About this Settlement</h2>
+      <Content />
+    </div>
+  </article>
+</Layout>
