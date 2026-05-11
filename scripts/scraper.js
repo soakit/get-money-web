@@ -44,6 +44,12 @@ async function scrapeSettlements() {
         // Find a date using regex (e.g. MM/DD/YYYY or Month DD, YYYY)
         const dateMatch = bodyText.match(/(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}, \d{4}/i);
         const deadlineDate = dateMatch ? new Date(dateMatch[0]) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default +30 days
+        
+        if (deadlineDate < new Date()) {
+          console.log(`Skipped ${url} - deadline has passed (${deadlineDate.toDateString()})`);
+          continue;
+        }
+
         const deadlineStr = deadlineDate.toISOString();
 
         const amountMatch = bodyText.match(/\$\d+(\.\d{2})?/);

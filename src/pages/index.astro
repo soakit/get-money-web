@@ -4,9 +4,9 @@ import SettlementCard from '../components/SettlementCard.astro';
 import { getCollection } from 'astro:content';
 
 const allSettlements = await getCollection('settlements');
-// Sort by deadline ascending
+// Sort by deadline descending
 const sortedSettlements = allSettlements.sort((a, b) => 
-  a.data.deadline.valueOf() - b.data.deadline.valueOf()
+  b.data.deadline.valueOf() - a.data.deadline.valueOf()
 );
 ---
 
